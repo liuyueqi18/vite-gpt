@@ -35,7 +35,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import Sidebar from './Sidebar.vue'
 
@@ -76,6 +76,10 @@ function findMenuItem(path, menus) {
   }
   return null
 }
+
+onMounted(() => {
+  console.log('%c当前环境：' + import.meta.env.VITE_APP_ENV, 'color: green; font-weight: bold;')
+})
 </script>
 
 <style scoped>
