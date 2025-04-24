@@ -8,7 +8,6 @@
     text-color="#fff"
     active-text-color="#ffd04b"
     :unique-opened="true"
-    :close-on-click-outside="true"
   >
     <SidebarMenu :menus="menus" />
   </el-menu>
