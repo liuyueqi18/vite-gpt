@@ -7,7 +7,11 @@
         :showBackButton="true"
         :btnLoading="false"
         :max-height="bubbleListRefMaxHeight"
-      />
+      >
+        <template #avatar="scope">
+          <div class="avatar">{{ scope.item.role === 'user' ? '我' : 'GPT' }}</div>
+        </template>
+      </BubbleList>
     </div>
 
     <div class="bottom-input">
@@ -18,21 +22,8 @@
         clearable
         @submit="handleUploadSearch"
       >
-        <template #action-list>
-          <div style="display: flex">
-            <el-button
-              type="primary"
-              plain
-              circle
-              :loading="senderLoading"
-              @click.stop="handleUploadSearch"
-            >
-              <el-icon><Top /></el-icon>
-            </el-button>
-            <el-button type="primary" circle :loading="senderLoading" @click="handleDeleteList">
-              <el-icon><Delete /></el-icon>
-            </el-button>
-          </div>
+        <template #prefix>
+          <el-button :icon="Delete" circle :loading="senderLoading" @click="handleDeleteList" />
         </template>
       </Sender>
     </div>
@@ -42,6 +33,7 @@
 <script setup>
 import { ref, nextTick, onMounted, computed } from 'vue'
 import { BubbleList, Sender } from 'vue-element-plus-x'
+import { Delete } from '@element-plus/icons-vue'
 import { fetchEventSource } from '@microsoft/fetch-event-source'
 import { useChatStore } from '@/stores/chatStore'
 import { ElMessageBox } from 'element-plus'
@@ -59,6 +51,9 @@ const BubblelistData = computed(() => {
     return {
       ...i,
       placement: i.role === 'user' ? 'end' : 'start',
+      avatar: true,
+      avatarSize: '36px', // 头像占位大小
+      avatarGap: '10px', // 头像与气泡之间的距离
     }
   })
 })
@@ -72,7 +67,13 @@ const handleGetList = () => {
   bubbleListRefMaxHeight.value = chatListRef.value.offsetHeight + 'px'
   nextTick(() => {
     if (chatStore.list?.length) {
-      list.value = chatStore.list
+      list.value = chatStore.list.map((i) => {
+        return {
+          ...i,
+          typing: false,
+          isFog: false,
+        }
+      })
       bubbleListRef.value?.scrollToBottom()
     }
   })
@@ -83,7 +84,7 @@ const handleSetList = () => {
 }
 
 const handleDeleteList = () => {
-  ElMessageBox.confirm('是否清除对话?', 'Warning', {
+  ElMessageBox.confirm('是否清除对话?', '', {
     confirmButtonText: '确认',
     cancelButtonText: '取消',
     type: 'warning',
@@ -107,6 +108,8 @@ const handleUploadSearch = async () => {
 
   list.value.push({ role: 'user', content: searchText.value })
   searchText.value = ''
+
+  bubbleListRef.value?.scrollToBottom()
 
   controller = new AbortController()
 
@@ -140,10 +143,10 @@ const handleUploadSearch = async () => {
           list.value.push({
             role: 'assistant',
             content: gptReply,
+            isFog: true,
           })
         }
         handleSetList()
-        bubbleListRef.value?.scrollToBottom()
       }
     },
     onerror(err) {
@@ -166,6 +169,16 @@ onMounted(() => {
   justify-content: space-between;
   padding: 10px;
   box-sizing: border-box;
+}
+
+.avatar {
+  width: 36px;
+  height: 36px;
+  background: #dcdfe6;
+  border-radius: 50%;
+  text-align: center;
+  line-height: 36px;
+  font-weight: bold;
 }
 
 .chat-list {
