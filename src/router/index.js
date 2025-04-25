@@ -35,14 +35,20 @@ export const routes = [
       {
         path: '/gpt',
         name: 'Gpt',
-        component: () => import('@/views/Menu/Menu1.vue'),
+        component: () => import('@/views/Gpt/Demo.vue'),
         meta: { title: 'GPT', icon: 'Tickets' },
         children: [
           {
-            path: '/gpt/demo',
-            name: 'GptDemo',
-            component: () => import('@/views/Gpt/Demo.vue'),
+            path: '/gpt/demo1',
+            name: 'GptDemo1',
+            component: () => import('@/views/Gpt/Demo1.vue'),
             meta: { title: 'GPT-1' },
+          },
+          {
+            path: '/gpt/demo2',
+            name: 'GptDemo2',
+            component: () => import('@/views/Gpt/Demo2.vue'),
+            meta: { title: 'GPT-2' },
           },
         ],
       },
