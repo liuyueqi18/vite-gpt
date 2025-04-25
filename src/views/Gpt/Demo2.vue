@@ -57,7 +57,7 @@ const handleUploadSearch = async () => {
 
   const userQuery = searchText.value
 
-  fetchEventSource('/api/chat', {
+  fetchEventSource('/gpt-api/chat', {
     method: 'POST',
     body: JSON.stringify({ text: userQuery }),
     headers: {

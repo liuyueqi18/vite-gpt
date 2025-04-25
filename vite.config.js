@@ -8,7 +8,7 @@ import vueDevTools from 'vite-plugin-vue-devtools'
 export default defineConfig({
   server: {
     proxy: {
-      '/api': 'http://localhost:3000',  // 转发到 Node 后端 API
+      '/gpt-api': 'http://localhost:3000',  // 转发到 Node 后端 API
     },
   },
   plugins: [

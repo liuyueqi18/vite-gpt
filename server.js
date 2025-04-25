@@ -6,7 +6,7 @@ app.use(express.json())
 
 const URL = 'https://spark-api-open.xf-yun.com/v1/chat/completions'
 
-app.post('/api/chat', async (req, res) => {
+app.post('/gpt-api/chat', async (req, res) => {
   const text = req.body.text
 
   try {
