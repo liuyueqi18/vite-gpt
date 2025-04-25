@@ -66,7 +66,6 @@ const handleUploadSearch = async () => {
       'Content-Type': 'application/json',
     },
     onmessage(msg) {
-      console.log('object :>> ', msg)
       searchText.value = ''
       if (msg.data === '[DONE]') {
         gptReply = ''
@@ -74,7 +73,6 @@ const handleUploadSearch = async () => {
         return
       }
       const res = JSON.parse(msg.data)
-      console.log('res :>> ', res)
       const content = res.choices[0].delta.content || ''
 
       if (content) {

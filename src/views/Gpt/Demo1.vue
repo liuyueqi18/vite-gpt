@@ -4,10 +4,10 @@
       <div
         v-for="(item, i) in list"
         :key="i"
-        :class="['chat-item', item.id === 'user' ? 'from-user' : 'from-gpt']"
+        :class="['chat-item', item.role === 'user' ? 'from-user' : 'from-gpt']"
       >
-        <div class="avatar">{{ item.id === 'user' ? '我' : 'GPT' }}</div>
-        <div class="bubble">{{ item.text }}</div>
+        <div class="avatar">{{ item.role === 'user' ? '我' : 'GPT' }}</div>
+        <div class="bubble">{{ item.content }}</div>
       </div>
     </div>
 
@@ -93,14 +93,10 @@ const handleUploadSearch = () => {
     ttsWS = new WebSocket(url) // 创建新的 WebSocket 实例
     ttsWS.onopen = () => {
       // WebSocket 连接成功后发送消息
-      webSocketSend(text)
-      list.value.push({ id: 'user', text })
+      list.value.push({ role: 'user', content: text })
+      webSocketSend()
       searchText.value = ''
       handleSetList()
-      const chatListElement = chatList.value
-      if (chatListElement) {
-        chatListElement.scrollTop = chatListElement.scrollHeight
-      }
     }
     ttsWS.onmessage = (e) => {
       handleWebSocketMessage(e)
@@ -115,7 +111,7 @@ const handleUploadSearch = () => {
 }
 
 // WebSocket 发送消息
-const webSocketSend = (text) => {
+const webSocketSend = () => {
   const params = {
     header: {
       app_id: APPID,
@@ -130,7 +126,7 @@ const webSocketSend = (text) => {
     },
     payload: {
       message: {
-        text: [{ role: 'user', content: text }],
+        text: list.value,
       },
     },
   }
@@ -147,16 +143,20 @@ const handleWebSocketMessage = (e) => {
 
     // 实时更新 GPT 消息
     const lastItem = list.value[list.value.length - 1]
-    if (lastItem && lastItem.id === 'gpt') {
-      lastItem.text = gptReply
+    if (lastItem && lastItem.role === 'assistant') {
+      lastItem.content = gptReply
     } else {
       // 如果没有 GPT 消息，插入新的一条
       list.value.push({
-        id: 'gpt',
-        text: gptReply,
+        role: 'assistant',
+        content: gptReply,
       })
     }
     handleSetList()
+    const chatListElement = chatList.value
+    if (chatListElement) {
+      chatListElement.scrollTop = chatListElement.scrollHeight
+    }
   }
 
   // status = 2 表示数据接收完成
