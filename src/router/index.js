@@ -50,6 +50,12 @@ export const routes = [
             component: () => import('@/views/Gpt/Demo2.vue'),
             meta: { title: 'GPT-2' },
           },
+          {
+            path: '/gpt/demo3',
+            name: 'GptDemo3',
+            component: () => import('@/views/Gpt/Demo3.vue'),
+            meta: { title: 'GPT-3' },
+          },
         ],
       },
       {

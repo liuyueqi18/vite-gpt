@@ -52,13 +52,9 @@ const handleUploadSearch = async () => {
 
   controller = new AbortController()
 
-  // const userQuery = searchText.value
   list.value.push({ role: 'user', content: searchText.value })
+  searchText.value = ''
 
-  // {
-  //           "role": "assistant",
-  //           "content": "你是知识渊博的助理"
-  //       },
   fetchEventSource('/gpt-api/chat', {
     method: 'POST',
     body: JSON.stringify({ list: list.value }),
@@ -66,7 +62,6 @@ const handleUploadSearch = async () => {
       'Content-Type': 'application/json',
     },
     onmessage(msg) {
-      searchText.value = ''
       if (msg.data === '[DONE]') {
         gptReply = ''
         controller.abort()
@@ -106,7 +101,6 @@ onMounted(() => {
   handleGetList()
 })
 </script>
-
 <style scoped>
 .gpt-page {
   height: 100%;
@@ -141,7 +135,7 @@ onMounted(() => {
   height: 36px;
   background: #dcdfe6;
   border-radius: 50%;
-  content-align: center;
+  text-align: center;
   line-height: 36px;
   margin: 0 10px;
   font-weight: bold;
