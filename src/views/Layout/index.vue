@@ -85,6 +85,7 @@ onMounted(() => {
 <style scoped>
 .layout {
   height: 100vh;
+  width: 100%;
   display: flex;
 }
 .el-menu {
