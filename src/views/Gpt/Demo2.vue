@@ -4,10 +4,10 @@
       <div
         v-for="(item, i) in list"
         :key="i"
-        :class="['chat-item', item.id === 'user' ? 'from-user' : 'from-gpt']"
+        :class="['chat-item', item.role === 'user' ? 'from-user' : 'from-gpt']"
       >
-        <div class="avatar">{{ item.id === 'user' ? '我' : 'GPT' }}</div>
-        <div class="bubble">{{ item.text }}</div>
+        <div class="avatar">{{ item.role === 'user' ? '我' : 'GPT' }}</div>
+        <div class="bubble">{{ item.content }}</div>
       </div>
     </div>
 
@@ -52,18 +52,21 @@ const handleUploadSearch = async () => {
 
   controller = new AbortController()
 
-  list.value.push({ id: 'user', text: searchText.value })
-  handleSetList()
+  // const userQuery = searchText.value
+  list.value.push({ role: 'user', content: searchText.value })
 
-  const userQuery = searchText.value
-
+  // {
+  //           "role": "assistant",
+  //           "content": "你是知识渊博的助理"
+  //       },
   fetchEventSource('/gpt-api/chat', {
     method: 'POST',
-    body: JSON.stringify({ text: userQuery }),
+    body: JSON.stringify({ list: list.value }),
     headers: {
       'Content-Type': 'application/json',
     },
     onmessage(msg) {
+      console.log('object :>> ', msg)
       searchText.value = ''
       if (msg.data === '[DONE]') {
         gptReply = ''
@@ -71,19 +74,20 @@ const handleUploadSearch = async () => {
         return
       }
       const res = JSON.parse(msg.data)
+      console.log('res :>> ', res)
       const content = res.choices[0].delta.content || ''
 
       if (content) {
         gptReply += content
         // 实时更新 GPT 消息
         const lastItem = list.value[list.value.length - 1]
-        if (lastItem && lastItem.id === 'gpt') {
-          lastItem.text = gptReply
+        if (lastItem && lastItem.role === 'assistant') {
+          lastItem.content = gptReply
         } else {
           // 如果没有 GPT 消息，插入新的一条
           list.value.push({
-            id: 'gpt',
-            text: gptReply,
+            role: 'assistant',
+            content: gptReply,
           })
         }
         handleSetList()
@@ -103,23 +107,6 @@ const handleUploadSearch = async () => {
 onMounted(() => {
   handleGetList()
 })
-
-// fetchEventSource('/api/chat', {
-//   method: 'POST',
-//   body: JSON.stringify({ text: '你好' }),
-//   headers: {
-//     'Content-Type': 'application/json',
-//   },
-//   onmessage(msg) {
-//     console.log('流式返回:', msg.data) // {"code":0,"message":"Success","sid":"cha000bd879@dx1966b49b387b8f2532","id":"cha000bd879@dx1966b49b387b8f2532","created":1745556714,"choices":[{"delta":{"role":"assistant","content":"你好"},"index":0}]}
-//     if(msg.data === '[DONE]'){
-//       // 结束
-//     }
-//   },
-//   onerror(err) {
-//     console.error('出错了:', err)
-//   },
-// })
 </script>
 
 <style scoped>
@@ -156,7 +143,7 @@ onMounted(() => {
   height: 36px;
   background: #dcdfe6;
   border-radius: 50%;
-  text-align: center;
+  content-align: center;
   line-height: 36px;
   margin: 0 10px;
   font-weight: bold;

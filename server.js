@@ -7,19 +7,13 @@ app.use(express.json())
 const URL = 'https://spark-api-open.xf-yun.com/v1/chat/completions'
 
 app.post('/gpt-api/chat', async (req, res) => {
-  const text = req.body.text
-
+  const { list } = req.body // 从请求体中提取 text 和 list
   try {
     const response = await axios.post(
       URL,
       {
         model: 'lite',
-        messages: [
-          {
-            role: 'user',
-            content: text,
-          },
-        ],
+        messages: [...list],
         stream: true,
       },
       {
@@ -28,7 +22,7 @@ app.post('/gpt-api/chat', async (req, res) => {
           Authorization: 'Bearer ZtjGDmzhcnjKzmJoaEuk:nMARjQGGJHaQgqxHoRnR',
         },
         responseType: 'stream',
-      }
+      },
     )
 
     res.setHeader('Content-Type', 'text/event-stream')
