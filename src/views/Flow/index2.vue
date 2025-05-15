@@ -13,24 +13,46 @@ import '@logicflow/core/lib/style/index.css'
 
 const lf = ref()
 
-const rawData = [
-  { id: '1', label: '1-TextTextTextText' },
-  { id: '2', label: '2-TextTextTextTextTextTextTextText' },
-  { id: '3', label: '3-TextTextTextText' },
-  { id: '4', label: '4-TextTextTextText' },
-  { id: '5', label: '5-TextTextTextTextTextTextTextTextTextTextTextTextTextTextTextText' },
-  { id: '6', label: '6-TextTextTextTextTextTextTextTextTextTextTextText' },
-  { id: '7', label: '7-TextTcvextTextTextTextTextTextTextTextTextTextText' },
-  //   { id: '7', label: '7-TextTcvextTextTextTextTextTextTextTextTextTextText' },
+const dataList = [
+  [
+    { id: '1', label: '1-TextTextTextText' },
+    { id: '2', label: '2-TextTextTextTextTextTextTextText' },
+    { id: '3', label: '3-TextTextTextText', pointId: '4-2', text: '边文字' },
+    { id: '4', label: '4-TextTextTextText' },
+    { id: '5', label: '5-TextTextTextTextTextTextTextTextTextTextTextTextTextTextTextText' },
+    { id: '6', label: '6-TextTextTextTextTextTextTextTextTextTextTextText' },
+    { id: '7', label: '7-TextTcvextTextTextTextTextTextTextTextTextTextText' },
+  ],
+  [
+    { id: '4-1', label: '4-1 子节点' },
+    { id: '4-2', label: '4-2 子节点' },
+    { id: '4-3', label: '4-3 子节点' },
+    { id: '4-4', label: '4-4 子节点' },
+    { id: '4-5', label: '4-5 子节点' },
+    { id: '4-6', label: '4-6 子节点', pointId: '6', text: '边文字' },
+    { id: '4-7', label: '4-7 子节点' },
+  ],
 ]
-function generateLogicflowGraph(rawData) {
+
+function findItemById(id, dataList) {
+  for (const group of dataList) {
+    for (const item of group) {
+      if (item.id === id) {
+        return item
+      }
+    }
+  }
+  return null // 没找到就返回 null
+}
+
+function generateLogicflowGraph(rawData, centerX = 0, centerY = 0) {
   const nodeWidth = 200
   const nodeHeight = 100
   const marginX = 60
   const marginY = 150
 
-  const centerX = 0
-  const centerY = 0
+  //   const centerX = 0
+  //   const centerY = 0
 
   const totalNodes = rawData.length
   const bottomCount = Math.min(2, totalNodes)
@@ -57,6 +79,7 @@ function generateLogicflowGraph(rawData) {
         nodeWidth,
         nodeHeight,
         nodeText: node.label,
+        pointId: node.pointId ?? '',
         flexDirection: 'row-reverse',
         nodeDirection: 'right',
         image: 'https://fanyi-cdn.cdn.bcebos.com/static/cat/asset/jpg.9b515fbd.png',
@@ -79,6 +102,7 @@ function generateLogicflowGraph(rawData) {
         nodeWidth: nodeWidth,
         nodeHeight: nodeHeight + 100,
         nodeText: node.label,
+        pointId: node.pointId ?? '',
         flexDirection: 'column-reverse',
         nodeDirection: 'bottom',
         image: 'https://fanyi-cdn.cdn.bcebos.com/static/cat/asset/jpg.9b515fbd.png',
@@ -103,6 +127,7 @@ function generateLogicflowGraph(rawData) {
         nodeWidth,
         nodeHeight,
         nodeText: node.label,
+        pointId: node.pointId ?? '',
         nodeDirection: 'left',
         image: 'https://fanyi-cdn.cdn.bcebos.com/static/cat/asset/jpg.9b515fbd.png',
       },
@@ -111,12 +136,17 @@ function generateLogicflowGraph(rawData) {
   })
 
   // 闭环连线
+  console.log('sequence :>> ', sequence)
+
   const edges = sequence.map((id, index) => {
     const nextId = sequence[(index + 1) % sequence.length]
+    // todo 节点组边文字
+    // const edgeText = findItemById(id, dataList)?.text ?? ''
     return {
       sourceNodeId: id,
       targetNodeId: nextId,
-      type: 'TaskLine',
+      type: 'polyline',
+      //   text: edgeText,
     }
   })
 
@@ -159,20 +189,22 @@ const init = async () => {
           thickness: 1,
         },
       },
-      adjustEdge: false,
-      adjustNodePosition: false,
-      hideAnchors: true,
-      hoverOutline: false,
-      nodeSelectedOutline: false,
-      edgeSelectedOutline: false,
-      nodeTextEdit: false,
-      edgeTextEdit: false,
-      textEdit: false,
+      // todo 调试时候下面都注释 方便
+      //   adjustEdge: false,
+      //   adjustNodePosition: false,
+      //   hideAnchors: true,
+      //   hoverOutline: false,
+      //   nodeSelectedOutline: false,
+      //   edgeSelectedOutline: false,
+      //   nodeTextEdit: false,
+      //   edgeTextEdit: false,
+      //   textEdit: false,
     })
 
-    lf.value.setTheme({
-      arrow: false,
-    })
+    // todo 是否开启箭头(全局)
+    // lf.value.setTheme({
+    //   arrow: false,
+    // })
 
     lf.value.register(TaskNode)
     lf.value.register(TaskLine)
@@ -184,10 +216,42 @@ const init = async () => {
 
     lf.value.on('task_node_text:click', (data) => {
       console.log('点击了节点文本', data)
-      // 这里可以做更多操作，比如高亮节点、弹窗等
+      // todo 弹窗打开查看文本
     })
 
-    const graphData = generateLogicflowGraph(rawData)
+    // todo 节点点击和边点击都在
+    // lf.value.on('node:click,edge:click', (data) => {
+    //   console.log('data :>> ', data)
+    // })
+
+    // 边 点击
+    lf.value.on('edge:click', (data) => {
+      console.log('点击了边 :>> ', data)
+    })
+
+    let nl = []
+    let el = []
+    dataList.forEach((ele, idx) => {
+      nl = nl.concat(generateLogicflowGraph(ele, 1000 * idx, 0).nodes)
+      el = el.concat(generateLogicflowGraph(ele, 1000 * idx, 0).edges)
+    })
+
+    nl.forEach((ele, idx) => {
+      if (ele.properties.pointId) {
+        el.push({
+          sourceNodeId: ele.id,
+          targetNodeId: ele.properties.pointId,
+          type: 'bezier',
+          text: findItemById(ele.id, dataList)?.text ?? '',
+        })
+      }
+    })
+
+    const graphData = {
+      nodes: nl,
+      edges: el,
+    }
+    console.log('graphData :>> ', graphData)
     lf.value.render(graphData)
 
     lf.value.fitView(160, 160)
