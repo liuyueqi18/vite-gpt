@@ -20,13 +20,13 @@ const rawData = [
   { id: '4', label: '4-TextTextTextText' },
   { id: '5', label: '5-TextTextTextTextTextTextTextTextTextTextTextTextTextTextTextText' },
   { id: '6', label: '6-TextTextTextTextTextTextTextTextTextTextTextText' },
-  { id: '7', label: '7-TextTextTextTextTextTextTextTextTextTextTextText' },
-  { id: '8', label: '8-TextTextTextTextTextTextTextTextTextTextTextText' },
+  { id: '7', label: '7-TextTcvextTextTextTextTextTextTextTextTextTextText' },
+  //   { id: '7', label: '7-TextTcvextTextTextTextTextTextTextTextTextTextText' },
 ]
 function generateLogicflowGraph(rawData) {
   const nodeWidth = 200
   const nodeHeight = 100
-  const marginX = 50
+  const marginX = 60
   const marginY = 150
 
   const centerX = 0
@@ -57,6 +57,8 @@ function generateLogicflowGraph(rawData) {
         nodeWidth,
         nodeHeight,
         nodeText: node.label,
+        flexDirection: 'row-reverse',
+        nodeDirection: 'right',
         image: 'https://fanyi-cdn.cdn.bcebos.com/static/cat/asset/jpg.9b515fbd.png',
       },
     })
@@ -69,14 +71,16 @@ function generateLogicflowGraph(rawData) {
     nodes.push({
       id: node.id,
       type: 'TaskNode',
-      x: centerX + totalWidth / 2 - i * (nodeWidth + marginX),
+      x: centerX + totalWidth / 2 - i * (nodeWidth + marginX) - 50,
       y:
         centerY +
         (Math.max(leftNodes.length, rightNodes.length) / 2 + 0.5) * (nodeHeight + marginY),
       properties: {
-        nodeWidth,
-        nodeHeight,
+        nodeWidth: nodeWidth,
+        nodeHeight: nodeHeight + 100,
         nodeText: node.label,
+        flexDirection: 'column-reverse',
+        nodeDirection: 'bottom',
         image: 'https://fanyi-cdn.cdn.bcebos.com/static/cat/asset/jpg.9b515fbd.png',
       },
     })
@@ -99,6 +103,7 @@ function generateLogicflowGraph(rawData) {
         nodeWidth,
         nodeHeight,
         nodeText: node.label,
+        nodeDirection: 'left',
         image: 'https://fanyi-cdn.cdn.bcebos.com/static/cat/asset/jpg.9b515fbd.png',
       },
     })
@@ -114,6 +119,29 @@ function generateLogicflowGraph(rawData) {
       type: 'TaskLine',
     }
   })
+
+  // 解决最后一条线的问题
+  try {
+    let startPointLast = {
+      x: nodes[nodes.length - 1].x - 50,
+      y: nodes[nodes.length - 1].y - 50,
+    }
+    let endPointLast = {
+      x: nodes[0].x + 50,
+      y: nodes[0].y - 50,
+    }
+    let pointsListLast = [
+      startPointLast,
+      { x: nodes[nodes.length - 1].x - 50, y: nodes[nodes.length - 1].y - 100 },
+      { x: nodes[0].x + 50, y: nodes[nodes.length - 1].y - 100 },
+      endPointLast,
+    ]
+    edges[edges.length - 1].startPoint = startPointLast
+    edges[edges.length - 1].endPoint = endPointLast
+    edges[edges.length - 1].pointsList = pointsListLast
+  } catch (error) {
+    console.log('error :>> ', error)
+  }
 
   return { nodes, edges }
 }
@@ -149,10 +177,15 @@ const init = async () => {
     lf.value.register(TaskNode)
     lf.value.register(TaskLine)
 
+    lf.value.on('history:change', () => {
+      const data = lf.value.getGraphData()
+      console.log('history:change', data)
+    })
+
     const graphData = generateLogicflowGraph(rawData)
     lf.value.render(graphData)
 
-    lf.value.fitView(80, 160)
+    lf.value.fitView(160, 160)
   })
 }
 
@@ -175,6 +208,7 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-direction: column;
 }
 :deep(.task_node_text) {
   width: 50%;

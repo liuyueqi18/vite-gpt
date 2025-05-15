@@ -7,14 +7,27 @@ class TaskModel extends HtmlNodeModel {
     // 设置节点宽高和锚点
     const width = this.properties?.nodeWidth ? this.properties.nodeWidth : defaultWidth
     const height = this.properties?.nodeHeight ? this.properties.nodeHeight : defaultHeight
+    const nodeDirection = this.properties?.nodeDirection ?? ''
     this.width = width
     this.height = height
-    this.anchorsOffset = [
-      [width / 2, 0],
-      [0, height / 2],
-      [-width / 2, 0],
-      [0, -height / 2],
-    ]
+    if (nodeDirection === 'left') {
+      this.anchorsOffset = [
+        [-width / 4, height / 2],
+        [-width / 4, -height / 2],
+      ]
+    }
+    if (nodeDirection === 'bottom') {
+      this.anchorsOffset = [
+        [width / 4, 0],
+        [-width / 4, 0],
+      ]
+    }
+    if (nodeDirection === 'right') {
+      this.anchorsOffset = [
+        [width / 4, height / 2],
+        [width / 4, -height / 2],
+      ]
+    }
   }
 }
 class TaskView extends HtmlNode {
@@ -22,12 +35,12 @@ class TaskView extends HtmlNode {
     const { properties } = this.props.model
     const nodeHeight = properties?.nodeHeight ? `${properties?.nodeHeight}px` : `${defaultHeight}px`
     const nodeWidth = properties?.nodeWidth ? `${properties?.nodeWidth}px` : `${defaultWidth}px`
-
+    const flexDirection = properties?.flexDirection ? properties.flexDirection : 'row'
     const el = document.createElement('div')
     el.className = 'task_node_box-wrapper'
 
     const html = `
-        <div class="task_node_box" style="height:${nodeHeight};width:${nodeWidth}">
+        <div class="task_node_box" style="height:${nodeHeight};width:${nodeWidth};flex-direction:${flexDirection}">
             <img class="task_node_img" src="${properties.image}" alt="">
             <div class="task_node_text" style="font-size:12px;">${properties.nodeText}</div>
         </div>
