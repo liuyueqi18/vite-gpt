@@ -65,6 +65,18 @@ export const routes = [
         meta: { title: '菜单2', icon: 'Tickets' },
       },
       {
+        path: '/flow',
+        name: 'Flow',
+        component: () => import('@/views/Flow/index.vue'),
+        meta: { title: '流程图', icon: 'Tickets' },
+      },
+      {
+        path: '/flow2',
+        name: 'Flow2',
+        component: () => import('@/views/Flow/index2.vue'),
+        meta: { title: '流程图2', icon: 'Tickets' },
+      },
+      {
         path: '/settings',
         name: 'Settings',
         component: () => import('@/views/Settings/index.vue'),
