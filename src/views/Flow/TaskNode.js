@@ -32,7 +32,7 @@ class TaskModel extends HtmlNodeModel {
 }
 class TaskView extends HtmlNode {
   setHtml(rootEl) {
-    const { properties } = this.props.model
+    const { properties, id } = this.props.model
     const nodeHeight = properties?.nodeHeight ? `${properties?.nodeHeight}px` : `${defaultHeight}px`
     const nodeWidth = properties?.nodeWidth ? `${properties?.nodeWidth}px` : `${defaultWidth}px`
     const flexDirection = properties?.flexDirection ? properties.flexDirection : 'row'
@@ -41,16 +41,28 @@ class TaskView extends HtmlNode {
 
     const html = `
         <div class="task_node_box" style="height:${nodeHeight};width:${nodeWidth};flex-direction:${flexDirection}">
-            <img class="task_node_img" src="${properties.image}" alt="">
-            <div class="task_node_text" style="font-size:12px;">${properties.nodeText}</div>
+          <img class="task_node_img" src="${properties.image}" alt="">
+          <div class="task_node_text" style="font-size:12px;cursor:pointer;">${properties.nodeText}</div>
         </div>
       `
-    //
-
     el.innerHTML = html
-    // 需要先把之前渲染的子节点清除掉。
+
+    // 清除旧内容
     rootEl.innerHTML = ''
     rootEl.appendChild(el)
+
+    // 给 .task_node_text 添加事件
+    const textEl = rootEl.querySelector('.task_node_text')
+    if (textEl) {
+      textEl.addEventListener('click', (e) => {
+        e.stopPropagation() // 阻止冒泡，防止触发 LogicFlow 其他点击事件
+        // 触发自定义事件，携带节点id
+        this.props.graphModel.eventCenter.emit('task_node_text:click', {
+          id,
+          properties,
+        })
+      })
+    }
   }
 }
 

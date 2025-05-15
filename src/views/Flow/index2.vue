@@ -182,6 +182,11 @@ const init = async () => {
       console.log('history:change', data)
     })
 
+    lf.value.on('task_node_text:click', (data) => {
+      console.log('点击了节点文本', data)
+      // 这里可以做更多操作，比如高亮节点、弹窗等
+    })
+
     const graphData = generateLogicflowGraph(rawData)
     lf.value.render(graphData)
 
